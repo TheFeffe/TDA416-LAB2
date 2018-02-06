@@ -1,5 +1,7 @@
 /**
  * A Sorted COllection With Get (SLCWithGet)
+ * sorted in ascending order (lowest first)
+ *
  * @param <E> an element that is naturally comparable
  */
 public class SLCWithGet<E
@@ -7,6 +9,13 @@ public class SLCWithGet<E
         extends LinkedCollection<E>
         implements CollectionWithGet<E> {
 
+    /**
+     * Adds element e to the collection, so that the smallest element
+     * is the first element and the greatest is the last element
+     *
+     * @param e
+     * @return
+     */
     @Override
     public boolean add(E e) {
         if (e == null) {
@@ -20,26 +29,45 @@ public class SLCWithGet<E
             return true;
         }
 
-        Entry entry = head;
-
-        // iterate through collection until our element is smaller than or equal to the next element
-        // or the next element is null (which means element is the largest in the collection)
-        while (e.compareTo(entry.element) >= 1) {
-            if (entry.next != null)
-                entry = entry.next;
-            else {   // element > all elements in collection
-                entry.next = newEntry;
+        Entry curr = head;
+        Entry pre = null;
+        // iterate, if e < current, attach to previous, if any
+        while(true){
+            if (e.compareTo(curr.element) < 0){ // if e < current element
+                if (pre == null){   // if current element is head
+                    head = newEntry;
+                    newEntry.next = curr;
+                }else{              // if current element is not head
+                    newEntry.next = curr;
+                    pre.next = newEntry;
+                }
                 return true;
             }
+            if (curr.next == null){ // if current element is last in list, i.e. e > all elements
+                curr.next = newEntry;
+                return true;
+            }
+            pre = curr;
+            curr = curr.next;
         }
-        // if element isn't largest
-        // Bucket swap to insert newEntry 'between' e and e.next
-        Entry next = entry.next;
-        entry.next = newEntry;
-        newEntry.next = next;
-
-        return true;
     }
+
+//    /**
+//     *
+//     * @param e
+//     * @param c
+//     * @return the Entry to which e should be attached to
+//     */
+//    public Entry addIt(E e, Entry c){
+//        if (c.next == null){
+//            return c;
+//        }
+//        if (e.compareTo(c.next.element) < 0){
+//            return c;
+//        }
+//
+//    }
+
 
     @Override
     public E get(E e) {
