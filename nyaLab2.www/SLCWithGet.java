@@ -32,8 +32,31 @@ public class SLCWithGet<E
         Entry curr = head;
         Entry pre = null;
         // iterate, if e < current, attach to previous, if any
+
+
+        //version 2, "better" code with clear exit to while, slightly worse in # of compareTo
+        //result: text1: 3 032 751 compareTo
+//        while (curr.next != null ||     // check for end of collection
+//                e.compareTo(curr.element) < 0) {
+//            if (e.compareTo(curr.element) < 0) { // if e < current element, attach to previous, if any
+//                if (pre == null) {   // if current element is head
+//                    head = newEntry;
+//                    newEntry.next = curr;
+//                } else {              // if current element is not head
+//                    newEntry.next = curr;
+//                    pre.next = newEntry;
+//                }
+//                return true;
+//            }
+//            pre = curr;
+//            curr = curr.next;
+//        }
+//        curr.next = newEntry;
+//        return true;
+
+        // result: text1: 3 032 745 compareTo
         while(true){
-            if (e.compareTo(curr.element) < 0){ // if e < current element
+            if (e.compareTo(curr.element) < 0){ // if e < current element, attach to previous, if any
                 if (pre == null){   // if current element is head
                     head = newEntry;
                     newEntry.next = curr;
@@ -51,23 +74,6 @@ public class SLCWithGet<E
             curr = curr.next;
         }
     }
-
-//    /**
-//     *
-//     * @param e
-//     * @param c
-//     * @return the Entry to which e should be attached to
-//     */
-//    public Entry addIt(E e, Entry c){
-//        if (c.next == null){
-//            return c;
-//        }
-//        if (e.compareTo(c.next.element) < 0){
-//            return c;
-//        }
-//
-//    }
-
 
     @Override
     public E get(E e) {
