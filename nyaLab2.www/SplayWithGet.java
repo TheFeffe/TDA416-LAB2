@@ -1,75 +1,156 @@
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchTree<E> implements CollectionWithGet<E>{
 
-public class SplayWithGet<T> implements CollectionWithGet<TestMapWithCounter.TestMapEntry<String,List<Integer>>> {
     @Override
-    public TestMapWithCounter.TestMapEntry<String, List<Integer>> get(TestMapWithCounter.TestMapEntry<String, List<Integer>> stringListTestMapEntry) {
+    protected Entry find(E elem, Entry t) {
+        int diff = elem.compareTo(t.element);
+
+        if ((t.right!=null && diff>0) || (t.left!=null && diff<0)){
+            //splay entry's parent
+        }
+
+
+
+        if (t.element.compareTo(elem) == 0){
+            return t;
+        }
+
+
+
+
+
+
+
+        return super.find(elem, t);
+    }
+
+    private void splay(Entry t){
+        while(t.parent!=null){
+            if (t.parent.parent == null) {
+                if (t.parent.right==t){
+                    zag(t.parent);
+                }
+                else{
+                    zig(t.parent);
+                }
+            }
+            else if (t.element.compareTo(t.parent.element)== t.parent.element.compareTo(t.parent.parent.element)){
+                if (t.parent.right==t){
+                    zigzag(t.parent);
+                }
+            }
+        }
+    }
+
+
+
+    /* Rotera 1 steg i hogervarv, dvs
+              x'                 y'
+             / \                / \
+            y'  C   -->        A   x'
+           / \                    / \
+          A   B                  B   C
+    */
+    private void zig(Entry x ) {
+        Entry   y = x.left;
+        E    temp = x.element;
+        x.element = y.element;
+        y.element = temp;
+        x.left    = y.left;
+        if ( x.left != null )
+            x.left.parent   = x;
+        y.left    = y.right;
+        y.right   = x.right;
+        if ( y.right != null )
+            y.right.parent  = y;
+        x.right   = y;
+    } //   zig
+
+    private void zagzig(Entry x ) {
+        Entry   y = x.left,
+                z = x.left.right;
+        E       e = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.right   = z.left;
+        if ( y.right != null )
+            y.right.parent = y;
+        z.left    = z.right;
+        z.right   = x.right;
+        if ( z.right != null )
+            z.right.parent = z;
+        x.right   = z;
+        z.parent  = x;
+    }  //  zagzig
+    // ========== ========== ========== ==========
+
+    /* Rotera 1 steg i vanstervarv, dvs
+              x'                 y'
+             / \                / \
+            A   y'  -->        x'  C
+               / \            / \
+              B   C          A   B
+    */
+    private void zag(Entry x ) {
+        Entry  y  = x.right;
+        E temp    = x.element;
+        x.element = y.element;
+        y.element = temp;
+        x.right   = y.right;
+        if ( x.right != null )
+            x.right.parent  = x;
+        y.right   = y.left;
+        y.left    = x.left;
+        if ( y.left != null )
+            y.left.parent   = y;
+        x.left    = y;
+    } //   zag
+
+
+    //pulls right-left child to x
+    private void zigzag(Entry x ) {
+        Entry  y  = x.right,
+                z  = x.right.left;
+        E      e  = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.left    = z.right;
+        if ( y.left != null )
+            y.left.parent = y;
+        z.right   = z.left;
+        z.left    = x.left;
+        if ( z.left != null )
+            z.left.parent = z;
+        x.left    = z;
+        z.parent  = x;
+    } //  zigzag
+
+    //pulls right-right child to x
+    private void zagzag(Entry x){
+        Entry  y  = x.right,
+                z  = x.right.right;
+        E      e  = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.right    = z.left;
+        if ( y.right != null )
+            y.right.parent = y;
+        z.left    = x.left;
+        if ( z.left != null )
+            z.left.parent = z;
+        z.right = y.left;
+        x.right = z.right;
+        y.left = z;
+        x.left = y;
+
+
+
+
+    }
+
+
+
+    @Override
+    public E get(E e) {
         return null;
-    }
-
-    @Override
-    public int size() {
-        return 0;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return false;
-    }
-
-    @Override
-    public boolean contains(Object o) {
-        return false;
-    }
-
-    @Override
-    public Iterator<TestMapWithCounter.TestMapEntry<String, List<Integer>>> iterator() {
-        return null;
-    }
-
-    @Override
-    public Object[] toArray() {
-        return new Object[0];
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-        return null;
-    }
-
-    @Override
-    public boolean add(TestMapWithCounter.TestMapEntry<String, List<Integer>> stringListTestMapEntry) {
-        return false;
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        return false;
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends TestMapWithCounter.TestMapEntry<String, List<Integer>>> c) {
-        return false;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        return false;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        return false;
-    }
-
-    @Override
-    public void clear() {
-
     }
 }
