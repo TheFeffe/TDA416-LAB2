@@ -64,6 +64,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
 
     // pulls left child to x
+    // is ok
     private void zig(Entry x) {
         Entry y = x.left;
         E temp = x.element;
@@ -79,8 +80,8 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         x.right = y;
     }
 
-
     // pulls right child to x
+    // is ok
     private void zag(Entry x) {
         Entry y = x.right;
         E temp = x.element;
@@ -97,6 +98,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     }
 
     // pulls left-right child to x
+    // is ok
     private void zagzig(Entry x) {
         Entry y = x.left,
                 z = x.left.right;
@@ -115,6 +117,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     }
 
     // pulls right-left child to x
+    // is ok
     private void zigzag(Entry x) {
         Entry y = x.right,
                 z = x.right.left;
@@ -133,11 +136,26 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     }
 
     // pulls left-left child to x
+    // is ok
     private void zigzig(Entry x) {
-
+        Entry y = x.left,
+                z = x.left.left;
+        E e = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.left = z.right;
+        if (y.left != null)
+            y.left.parent = y;
+        z.right = x.right;
+        if (z.right != null)
+            z.right.parent = z;
+        z.left = y.right;
+        y.right = z;
+        x.right = y;
     }
 
     // pulls right-right child to x
+    // is ok
     private void zagzag(Entry x) {
         Entry y = x.right,
                 z = x.right.right;
@@ -161,6 +179,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     @Override
     public E get(E e) {
-        return null;
+        Entry entry = find(e);  // this will splay the tree
+        return entry != null ? entry.element : null;    // return the element is found, otherwise null
     }
 }
