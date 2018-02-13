@@ -1,141 +1,154 @@
-public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchTree<E> implements CollectionWithGet<E>{
+public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchTree<E> implements CollectionWithGet<E> {
+
+
+    public Entry find(E elem) {
+        return find(elem, root);
+    }
 
     @Override
     protected Entry find(E elem, Entry t) {
-        int diff = elem.compareTo(t.element);
-
-        if ((t.right!=null && diff>0) || (t.left!=null && diff<0)){
-            //splay entry's parent
+        if (elem == null) {
+            throw new NullPointerException();
         }
 
+        Entry current = root;
 
-
-        if (t.element.compareTo(elem) == 0){
-            return t;
+        while (current.element != elem) {
+            if (current.element.compareTo(elem) < 0) {
+                if (current.left == null) {
+                    splay(current);
+                    return null;
+                }
+                current = current.left;
+            } else {
+                if (current.right == null) {
+                    splay(current);
+                    return null;
+                }
+                current = current.right;
+            }
         }
-
-
-
-
-
-
-
-        return super.find(elem, t);
+        splay(current);
+        return current;
     }
 
-    private void splay(Entry t){
-        while(t.parent!=null){
-            if (t.parent.parent == null) {
-                if (t.parent.right==t){
+    private void splay(Entry t) {
+        while (t.parent != null) {
+            if (t.parent.parent == null) {  // t is at depth 1 -> simple zig/zag
+                if (t.parent.right == t) {  // if t is right child to root
                     zag(t.parent);
-                }
-                else{
+                } else {                    // else t is left child to root
                     zig(t.parent);
                 }
-            }
-            else if (t.element.compareTo(t.parent.element)== t.parent.element.compareTo(t.parent.parent.element)){
-                if (t.parent.right==t){
-                    zigzag(t.parent);
+            } else {
+                boolean parentIsRightChild = t.parent.parent.right == t.parent;
+                boolean tIsRightChild = t.parent.right == t;
+
+                // t is 2 levels down from a sub-root, some combination of left/right-child
+                if (parentIsRightChild == tIsRightChild) {   // is right-right or left-left
+                    if (tIsRightChild) {    // is right-right
+                        zagzag(t.parent.parent);
+                    } else {                // is left-left
+                        zigzig(t.parent.parent);
+                    }
+                } else {  // is right-left or left-right
+                    if (tIsRightChild) {    // t is left-right
+                        zagzig(t);
+                    } else {                // t is right-left
+                        zigzag(t);
+                    }
                 }
             }
         }
     }
 
 
-
-    /* Rotera 1 steg i hogervarv, dvs
-              x'                 y'
-             / \                / \
-            y'  C   -->        A   x'
-           / \                    / \
-          A   B                  B   C
-    */
-    private void zig(Entry x ) {
-        Entry   y = x.left;
-        E    temp = x.element;
+    // pulls left child to x
+    private void zig(Entry x) {
+        Entry y = x.left;
+        E temp = x.element;
         x.element = y.element;
         y.element = temp;
-        x.left    = y.left;
-        if ( x.left != null )
-            x.left.parent   = x;
-        y.left    = y.right;
-        y.right   = x.right;
-        if ( y.right != null )
-            y.right.parent  = y;
-        x.right   = y;
-    } //   zig
-
-    private void zagzig(Entry x ) {
-        Entry   y = x.left,
-                z = x.left.right;
-        E       e = x.element;
-        x.element = z.element;
-        z.element = e;
-        y.right   = z.left;
-        if ( y.right != null )
+        x.left = y.left;
+        if (x.left != null)
+            x.left.parent = x;
+        y.left = y.right;
+        y.right = x.right;
+        if (y.right != null)
             y.right.parent = y;
-        z.left    = z.right;
-        z.right   = x.right;
-        if ( z.right != null )
-            z.right.parent = z;
-        x.right   = z;
-        z.parent  = x;
-    }  //  zagzig
-    // ========== ========== ========== ==========
+        x.right = y;
+    }
 
-    /* Rotera 1 steg i vanstervarv, dvs
-              x'                 y'
-             / \                / \
-            A   y'  -->        x'  C
-               / \            / \
-              B   C          A   B
-    */
-    private void zag(Entry x ) {
-        Entry  y  = x.right;
-        E temp    = x.element;
+
+    // pulls right child to x
+    private void zag(Entry x) {
+        Entry y = x.right;
+        E temp = x.element;
         x.element = y.element;
         y.element = temp;
-        x.right   = y.right;
-        if ( x.right != null )
-            x.right.parent  = x;
-        y.right   = y.left;
-        y.left    = x.left;
-        if ( y.left != null )
-            y.left.parent   = y;
-        x.left    = y;
-    } //   zag
-
-
-    //pulls right-left child to x
-    private void zigzag(Entry x ) {
-        Entry  y  = x.right,
-                z  = x.right.left;
-        E      e  = x.element;
-        x.element = z.element;
-        z.element = e;
-        y.left    = z.right;
-        if ( y.left != null )
+        x.right = y.right;
+        if (x.right != null)
+            x.right.parent = x;
+        y.right = y.left;
+        y.left = x.left;
+        if (y.left != null)
             y.left.parent = y;
-        z.right   = z.left;
-        z.left    = x.left;
-        if ( z.left != null )
-            z.left.parent = z;
-        x.left    = z;
-        z.parent  = x;
-    } //  zigzag
+        x.left = y;
+    }
 
-    //pulls right-right child to x
-    private void zagzag(Entry x){
-        Entry  y  = x.right,
-                z  = x.right.right;
-        E      e  = x.element;
+    // pulls left-right child to x
+    private void zagzig(Entry x) {
+        Entry y = x.left,
+                z = x.left.right;
+        E e = x.element;
         x.element = z.element;
         z.element = e;
-        y.right    = z.left;
-        if ( y.right != null )
+        y.right = z.left;
+        if (y.right != null)
             y.right.parent = y;
-        z.left    = x.left;
-        if ( z.left != null )
+        z.left = z.right;
+        z.right = x.right;
+        if (z.right != null)
+            z.right.parent = z;
+        x.right = z;
+        z.parent = x;
+    }
+
+    // pulls right-left child to x
+    private void zigzag(Entry x) {
+        Entry y = x.right,
+                z = x.right.left;
+        E e = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.left = z.right;
+        if (y.left != null)
+            y.left.parent = y;
+        z.right = z.left;
+        z.left = x.left;
+        if (z.left != null)
+            z.left.parent = z;
+        x.left = z;
+        z.parent = x;
+    }
+
+    // pulls left-left child to x
+    private void zigzig(Entry x) {
+
+    }
+
+    // pulls right-right child to x
+    private void zagzag(Entry x) {
+        Entry y = x.right,
+                z = x.right.right;
+        E e = x.element;
+        x.element = z.element;
+        z.element = e;
+        y.right = z.left;
+        if (y.right != null)
+            y.right.parent = y;
+        z.left = x.left;
+        if (z.left != null)
             z.left.parent = z;
         z.right = y.left;
         x.right = z.right;
@@ -143,10 +156,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         x.left = y;
 
 
-
-
     }
-
 
 
     @Override
