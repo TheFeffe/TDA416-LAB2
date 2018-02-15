@@ -2,12 +2,43 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     private boolean exactMatch = false;
 
+
+//    @Override
+//    public boolean add(E elem) {
+//        if (root == null) {
+//            root = new Entry(elem, null);
+//        } else {
+//            addIn(elem, root);
+//        }
+//        return true;
+//    }
+
+//    @Override
+//    protected void addIn(E newElem, Entry t) {
+//        int comp = newElem.compareTo(t.element);
+//        if (comp < 0) {
+//            if (t.left == null) {
+//                t.left = new Entry(newElem, t);
+//            } else {
+//                addIn(newElem, t.left);
+//            }
+//        } else if (comp > 0) {
+//            if (t.right == null) {
+//                t.right = new Entry(newElem, t);
+//            } else {
+//                addIn(newElem, t.right);
+//            }
+//        }
+//    }
+
     @Override
     protected Entry find(E elem, Entry t) {
+        if (root == null) return null;
+        if (elem == null || t == null) throw new NullPointerException();
         exactMatch = true;
         Entry found = findInternal(elem, t);
         splay(found);
-        return exactMatch ? found : null;
+        return exactMatch ? root : null;
     }
 
     /**
@@ -19,20 +50,20 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
      * @return the Entry containing elem, or its would-be parent if elem is missing
      */
     private Entry findInternal(E elem, Entry t) {
-        int diff = t.element.compareTo(elem);
+        int diff = elem.compareTo(t.element);
 
         if (diff > 0) {
             if (t.right == null) {
                 exactMatch = false;
                 return t;
             } else
-                return findInternal(elem, t);
+                return findInternal(elem, t.right);
         } else if (diff < 0) {
             if (t.left == null) {
                 exactMatch = false;
                 return t;
             } else
-                return findInternal(elem, t);
+                return findInternal(elem, t.left);
         } else
             return t;
     }
@@ -41,7 +72,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     @Override
     public E get(E e) {
         Entry entry = find(e, root);  // this will splay the tree
-        return entry.element;
+        return entry == null ? null : entry.element;
     }
 
     /**
@@ -51,38 +82,102 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
      * @param t
      */
     private void splay(Entry t) {
-        while (t.parent != null) {
-            if (t.parent.parent == null) {  // t is at depth 1 -> simple zig/zag
-                if (t.parent.right == t) {  // if t is right child to root
-                    zag(t.parent);
-                } else {                    // else t is left child to root
-                    zig(t.parent);
-                }
-            } else {
-                boolean parentIsRightChild = t.parent.parent.right == t.parent;
-                boolean tIsRightChild = t.parent.right == t;
+        //we have arrived at our destination, mind the gap
+        if (t == root) {
+            System.out.println("DOOOOONNEEEEEE");
+            return;
+        }
 
-                // t is 2 levels down from a sub-root, some combination of left/right-child
-                if (parentIsRightChild == tIsRightChild) {   // is right-right or left-left
-                    if (tIsRightChild) {    // is right-right
-                        zagzag(t.parent.parent);
-                    } else {                // is left-left
-                        zigzig(t.parent.parent);
-                    }
-                } else {  // is right-left or left-right
-                    if (tIsRightChild) {    // t is left-right
-                        zagzig(t);
-                    } else {                // t is right-left
-                        zigzag(t);
-                    }
+        //if t is on the "first level"
+        if (t.parent== root) {
+            System.out.println("First LEvel");
+            if (t.parent.right == t) {
+                rightToSubRoot(t.parent);
+                splay(t.parent);
+                return;
+            }
+
+            if (t.parent.left == t) {
+                leftToSubRoot(t.parent);
+                splay(t.parent);
+                return;
+            }
+        } else {
+            boolean parentIsRightChild = t.parent.parent.right == t.parent;
+            boolean tIsRightChild = t.parent.right == t;
+
+            //t is 2 "levels" or more down
+            if (parentIsRightChild == tIsRightChild) {   // is rightToSubRoot-rightToSubRoot or leftToSubRoot-leftToSubRoot
+                if (tIsRightChild) {    // is rightToSubRoot-rightToSubRoot
+                    rightRightToSubRoot(t.parent.parent);
+                    splay(t.parent.parent);
+                    return;
+                } else {                // is leftToSubRoot-leftToSubRoot
+                    leftLeftToSubRoot(t.parent.parent);
+                    splay(t.parent.parent);
+                    return;
+                }
+            } else {  // is rightToSubRoot-leftToSubRoot or leftToSubRoot-rightToSubRoot
+                if (tIsRightChild) {    // t is leftToSubRoot-rightToSubRoot
+                    System.out.println("here i am, eight lwfting ");
+                    leftRightToSubRoot(t.parent.parent);
+
+                    System.out.println("here i am, eight lwfting 2");
+
+                    splay(t.parent);
+                    return;
+                } else {                // t is rightToSubRoot-leftToSubRoot
+                    System.out.println("here i am, left righting ");
+                    rightLeftToSubRoot(t.parent.parent);
+
+                    System.out.println("here i am, left righting 2");
+                    splay(t.parent);
+                    return;
                 }
             }
+
         }
+        return;
+
+
+//        while (t.parent != null) {
+//            if (t.parent.parent == null) {  // t is at depth 1 -> simple leftToSubRoot/rightToSubRoot
+//                if (t.parent.rightToSubRoot == t) {  // if t is rightToSubRoot child to root
+//                    rightToSubRoot(t.parent);
+//                    t = t.parent;
+//                } else {                    // else t is leftToSubRoot child to root
+//                    leftToSubRoot(t.parent);
+//                    t = t.parent;
+//                }
+//            } else {
+//                boolean parentIsRightChild = t.parent.parent.rightToSubRoot == t.parent;
+//                boolean tIsRightChild = t.parent.rightToSubRoot == t;
+//
+//                // t is 2 levels down from a sub-root, some combination of leftToSubRoot/rightToSubRoot-child
+//                if (parentIsRightChild == tIsRightChild) {   // is rightToSubRoot-rightToSubRoot or leftToSubRoot-leftToSubRoot
+//                    if (tIsRightChild) {    // is rightToSubRoot-rightToSubRoot
+//                        rightRightToSubRoot(t.parent.parent);
+//                        t = t.parent.parent;
+//                    } else {                // is leftToSubRoot-leftToSubRoot
+//                        leftLeftToSubRoot(t.parent.parent);
+//                        t = t.parent.parent;
+//                    }
+//                } else {  // is rightToSubRoot-leftToSubRoot or leftToSubRoot-rightToSubRoot
+//                    if (tIsRightChild) {    // t is leftToSubRoot-rightToSubRoot
+//                        leftRightToSubRoot(t.parent.parent);
+//                        t = t.parent.parent;
+//                    } else {                // t is rightToSubRoot-leftToSubRoot
+//                        rightLeftToSubRoot(t.parent.parent);
+//                        t = t.parent.parent;
+//                    }
+//                }
+//            }
+//        }
     }
 
-    // pulls left child to x
+    // pulls leftToSubRoot child to x
     // is ok
-    void zig(Entry x) {
+    void leftToSubRoot(Entry x) {
         Entry y = x.left;
         E temp = x.element;
         x.element = y.element;
@@ -97,9 +192,10 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         x.right = y;
     }
 
-    // pulls right child to x
+    // pulls rightToSubRoot child to x
     // is ok
-    void zag(Entry x) {
+    void rightToSubRoot(Entry x) {
+
         Entry y = x.right;
         E temp = x.element;
         x.element = y.element;
@@ -114,9 +210,21 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         x.left = y;
     }
 
-    // pulls left-right child to x
+    // pulls leftToSubRoot-rightToSubRoot child to x
     // is ok
-    void zagzig(Entry x) {
+    void leftRightToSubRoot(Entry x) {
+//        Entry y = x.leftToSubRoot,
+//                z = x.leftToSubRoot.rightToSubRoot;
+//        E e = x.element;
+//        x.element = z.element;
+//        z.element = e;
+//        y.rightToSubRoot = z.leftToSubRoot;
+//        if (y.rightToSubRoot != null) y.rightToSubRoot.parent = y;
+//        z.leftToSubRoot = z.rightToSubRoot;
+//        z.rightToSubRoot = x.rightToSubRoot;
+//        if (z.rightToSubRoot != null) z.rightToSubRoot.parent = z;
+//        x.rightToSubRoot = z;
+//        if (x.rightToSubRoot != null) x.rightToSubRoot.parent = x;
         Entry y = x.left,
                 z = x.left.right;
         E e = x.element;
@@ -131,28 +239,43 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
             z.right.parent = z;
         x.right = z;
         z.parent = x;
+
     }
 
-    // pulls right-left child to x
+    // pulls rightToSubRoot-leftToSubRoot child to x
     // is ok
-    void zigzag(Entry x) {
+    void rightLeftToSubRoot(Entry x) {
+//        Entry y = x.rightToSubRoot,
+//                z = x.rightToSubRoot.leftToSubRoot;
+//        E e = x.element;
+//        x.element = z.element;
+//        z.element = e;
+//        y.leftToSubRoot = z.rightToSubRoot;
+//        if (y.leftToSubRoot != null) y.leftToSubRoot.parent = y;
+//        z.rightToSubRoot = z.leftToSubRoot;
+//        z.leftToSubRoot = x.leftToSubRoot;
+//        if (z.leftToSubRoot != null) z.leftToSubRoot.parent = z;
+//        x.leftToSubRoot = z;
+//        if (x.leftToSubRoot != null) x.leftToSubRoot.parent = x;
         Entry y = x.right,
                 z = x.right.left;
         E e = x.element;
         x.element = z.element;
         z.element = e;
         y.left = z.right;
-        if (y.left != null) y.left.parent = y;
+        if (y.left != null)
+            y.left.parent = y;
         z.right = z.left;
         z.left = x.left;
-        if (z.left != null) z.left.parent = z;
+        if (z.left != null)
+            z.left.parent = z;
         x.left = z;
-        if (x.left!=null) x.left.parent = x;
+        z.parent = x;
     }
 
-    // pulls left-left child to x
+    // pulls leftToSubRoot-leftToSubRoot child to x
     // is ok
-    void zigzig(Entry x) {
+    void leftLeftToSubRoot(Entry x) {
         Entry y = x.left,
                 z = x.left.left;
         E e = x.element;
@@ -164,17 +287,18 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         z.right = x.right;
         if (z.right != null)
             z.right.parent = z;
+        x.left = z.left;
+        if (x.left != null) x.left.parent = x;
         z.left = y.right;
-        if (z.left!=null) z.left.parent=z;
+        if (z.left != null) z.left.parent = z;
         y.right = z;
-        if (y.right != null) y.right.parent = y;
         x.right = y;
-        if (x.right!=null) x.right.parent=x;
+
     }
 
-    // pulls right-right child to x
+    // pulls rightToSubRoot-rightToSubRoot child to x
     // is ok
-    void zagzag(Entry x) {
+    void rightRightToSubRoot(Entry x) {
         Entry y = x.right,
                 z = x.right.right;
         E e = x.element;
@@ -186,10 +310,13 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         z.left = x.left;
         if (z.left != null)
             z.left.parent = z;
-        z.right = y.left;
         x.right = z.right;
+        if (x.right != null) x.right.parent = x;
+        z.right = y.left;
+        if (z.right != null) z.right.parent = z;
         y.left = z;
         x.left = y;
+
 
 
     }
