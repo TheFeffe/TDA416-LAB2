@@ -635,7 +635,7 @@ public class BinarySearchTree<E extends Comparable<? super E>>
 			System.out.print(it.next() + " ");
 		}
 		System.out.println();
-		
+
 		/*
 		SplayTreeWithGet<Integer> st = new SplayTreeWithGet<Integer>();
 		st.add(100);

@@ -1,41 +1,55 @@
 public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchTree<E> implements CollectionWithGet<E> {
 
-
-    public Entry find(E elem) {
-        return find(elem, root);
-    }
+    private boolean exactMatch = false;
 
     @Override
     protected Entry find(E elem, Entry t) {
-        if (elem == null) {
-            throw new NullPointerException();
-        }
-
-        if (root == null){
-            return null;
-        }
-
-        Entry current = root;
-
-        while (current.element != elem) {
-            if (current.element.compareTo(elem) < 0) {
-                if (current.left == null) {
-                    splay(current);
-                    return null;
-                }
-                current = current.left;
-            } else {
-                if (current.right == null) {
-                    splay(current);
-                    return null;
-                }
-                current = current.right;
-            }
-        }
-        splay(current);
-        return current;
+        exactMatch = true;
+        Entry found = findInternal(elem, t);
+        splay(found);
+        return exactMatch ? found : null;
     }
 
+    /**
+     * Returns an Entry that satisfies compareTo = 0
+     * or the last entry before that entry would exist
+     *
+     * @param elem the element to find (such that elem.compareTo returns 0)
+     * @param t    an Entry to search from
+     * @return the Entry containing elem, or its would-be parent if elem is missing
+     */
+    private Entry findInternal(E elem, Entry t) {
+        int diff = t.element.compareTo(elem);
+
+        if (diff > 0) {
+            if (t.right == null) {
+                exactMatch = false;
+                return t;
+            } else
+                return findInternal(elem, t);
+        } else if (diff < 0) {
+            if (t.left == null) {
+                exactMatch = false;
+                return t;
+            } else
+                return findInternal(elem, t);
+        } else
+            return t;
+    }
+
+
+    @Override
+    public E get(E e) {
+        Entry entry = find(e, root);  // this will splay the tree
+        return entry.element;
+    }
+
+    /**
+     * "splays" Entry t so that it is the root of the tree
+     * by performing rotations
+     *
+     * @param t
+     */
     private void splay(Entry t) {
         while (t.parent != null) {
             if (t.parent.parent == null) {  // t is at depth 1 -> simple zig/zag
@@ -66,10 +80,9 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         }
     }
 
-
     // pulls left child to x
     // is ok
-    private void zig(Entry x) {
+    void zig(Entry x) {
         Entry y = x.left;
         E temp = x.element;
         x.element = y.element;
@@ -86,7 +99,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     // pulls right child to x
     // is ok
-    private void zag(Entry x) {
+    void zag(Entry x) {
         Entry y = x.right;
         E temp = x.element;
         x.element = y.element;
@@ -103,7 +116,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     // pulls left-right child to x
     // is ok
-    private void zagzig(Entry x) {
+    void zagzig(Entry x) {
         Entry y = x.left,
                 z = x.left.right;
         E e = x.element;
@@ -122,7 +135,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     // pulls right-left child to x
     // is ok
-    private void zigzag(Entry x) {
+    void zigzag(Entry x) {
         Entry y = x.right,
                 z = x.right.left;
         E e = x.element;
@@ -139,7 +152,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     // pulls left-left child to x
     // is ok
-    private void zigzig(Entry x) {
+    void zigzig(Entry x) {
         Entry y = x.left,
                 z = x.left.left;
         E e = x.element;
@@ -161,7 +174,7 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     // pulls right-right child to x
     // is ok
-    private void zagzag(Entry x) {
+    void zagzag(Entry x) {
         Entry y = x.right,
                 z = x.right.right;
         E e = x.element;
@@ -181,10 +194,4 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     }
 
-
-    @Override
-    public E get(E e) {
-        Entry entry = find(e);  // this will splay the tree
-        return entry != null ? entry.element : null;    // return the element is found, otherwise null
-    }
 }
