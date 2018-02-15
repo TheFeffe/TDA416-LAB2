@@ -11,6 +11,10 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
             throw new NullPointerException();
         }
 
+        if (root == null){
+            return null;
+        }
+
         Entry current = root;
 
         while (current.element != elem) {
@@ -125,14 +129,12 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         x.element = z.element;
         z.element = e;
         y.left = z.right;
-        if (y.left != null)
-            y.left.parent = y;
+        if (y.left != null) y.left.parent = y;
         z.right = z.left;
         z.left = x.left;
-        if (z.left != null)
-            z.left.parent = z;
+        if (z.left != null) z.left.parent = z;
         x.left = z;
-        z.parent = x;
+        if (x.left!=null) x.left.parent = x;
     }
 
     // pulls left-left child to x
@@ -150,8 +152,11 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         if (z.right != null)
             z.right.parent = z;
         z.left = y.right;
+        if (z.left!=null) z.left.parent=z;
         y.right = z;
+        if (y.right != null) y.right.parent = y;
         x.right = y;
+        if (x.right!=null) x.right.parent=x;
     }
 
     // pulls right-right child to x
