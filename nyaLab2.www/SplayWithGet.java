@@ -2,35 +2,14 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
 
     private boolean exactMatch = false;
 
-
-//    @Override
-//    public boolean add(E elem) {
-//        if (root == null) {
-//            root = new Entry(elem, null);
-//        } else {
-//            addIn(elem, root);
-//        }
-//        return true;
-//    }
-
-//    @Override
-//    protected void addIn(E newElem, Entry t) {
-//        int comp = newElem.compareTo(t.element);
-//        if (comp < 0) {
-//            if (t.left == null) {
-//                t.left = new Entry(newElem, t);
-//            } else {
-//                addIn(newElem, t.left);
-//            }
-//        } else if (comp > 0) {
-//            if (t.right == null) {
-//                t.right = new Entry(newElem, t);
-//            } else {
-//                addIn(newElem, t.right);
-//            }
-//        }
-//    }
-
+    /**
+     * Returns an Entry containing element e that satisfies
+     * elem.compareTo(e) == 0 or null if no such
+     *
+     * @param elem
+     * @param t    the "root" entry for the search, usually root
+     * @return
+     */
     @Override
     protected Entry find(E elem, Entry t) {
         if (root == null) return null;
@@ -42,8 +21,18 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     }
 
     /**
-     * Returns an Entry that satisfies compareTo = 0
-     * or the last entry before that entry would exist
+     * Overloaded default find, searching from root
+     * @param elem
+     * @return
+     */
+    protected Entry find(E elem) {
+        return find(elem, root);
+    }
+
+    /**
+     * Returns an Entry containing element e that satisfies
+     * elem.compareTo(e) or, if there is no such element, what
+     * its parent would be
      *
      * @param elem the element to find (such that elem.compareTo returns 0)
      * @param t    an Entry to search from
@@ -69,6 +58,12 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     }
 
 
+    /**
+     * Returns an element that satisfies e.compareTo(element) == 0
+     * or null if no such element.
+     * @param e The dummy element to compare to.
+     * @return
+     */
     @Override
     public E get(E e) {
         Entry entry = find(e, root);  // this will splay the tree
@@ -84,13 +79,11 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
     private void splay(Entry t) {
         //we have arrived at our destination, mind the gap
         if (t == root) {
-            System.out.println("DOOOOONNEEEEEE");
             return;
         }
 
         //if t is on the "first level"
-        if (t.parent== root) {
-            System.out.println("First LEvel");
+        if (t.parent == root) {
             if (t.parent.right == t) {
                 rightToSubRoot(t.parent);
                 splay(t.parent);
@@ -119,18 +112,11 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
                 }
             } else {  // is rightToSubRoot-leftToSubRoot or leftToSubRoot-rightToSubRoot
                 if (tIsRightChild) {    // t is leftToSubRoot-rightToSubRoot
-                    System.out.println("here i am, eight lwfting ");
                     leftRightToSubRoot(t.parent.parent);
-
-                    System.out.println("here i am, eight lwfting 2");
-
                     splay(t.parent);
                     return;
                 } else {                // t is rightToSubRoot-leftToSubRoot
-                    System.out.println("here i am, left righting ");
                     rightLeftToSubRoot(t.parent.parent);
-
-                    System.out.println("here i am, left righting 2");
                     splay(t.parent);
                     return;
                 }
@@ -316,7 +302,6 @@ public class SplayWithGet<E extends Comparable<? super E>> extends BinarySearchT
         if (z.right != null) z.right.parent = z;
         y.left = z;
         x.left = y;
-
 
 
     }
