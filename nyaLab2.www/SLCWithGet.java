@@ -31,42 +31,18 @@ public class SLCWithGet<E
 
         Entry curr = head;
         Entry pre = null;
-        // iterate, if e < current, attach to previous, if any
-
-
-        //version 2, "better" code with clear exit to while, slightly worse in # of compareTo
-        //result: text1: 3 032 751 compareTo
-//        while (curr.next != null ||     // check for end of collection
-//                e.compareTo(curr.element) < 0) {
-//            if (e.compareTo(curr.element) < 0) { // if e < current element, attach to previous, if any
-//                if (pre == null) {   // if current element is head
-//                    head = newEntry;
-//                    newEntry.next = curr;
-//                } else {              // if current element is not head
-//                    newEntry.next = curr;
-//                    pre.next = newEntry;
-//                }
-//                return true;
-//            }
-//            pre = curr;
-//            curr = curr.next;
-//        }
-//        curr.next = newEntry;
-//        return true;
-
-        // result: text1: 3 032 745 compareTo
-        while(true){
-            if (e.compareTo(curr.element) < 0){ // if e < current element, attach to previous, if any
-                if (pre == null){   // if current element is head
+        while (true) {
+            if (e.compareTo(curr.element) < 0) { // if e < current element, attach to previous, if any
+                if (pre == null) {   // if current element is head
                     head = newEntry;
                     newEntry.next = curr;
-                }else{              // if current element is not head
+                } else {              // if current element is not head
                     newEntry.next = curr;
                     pre.next = newEntry;
                 }
                 return true;
             }
-            if (curr.next == null){ // if current element is last in list, i.e. e > all elements
+            if (curr.next == null) { // if current element is last in list, i.e. e > all elements
                 curr.next = newEntry;
                 return true;
             }
@@ -75,6 +51,13 @@ public class SLCWithGet<E
         }
     }
 
+    /**
+     * Returns an element elem that satisfies
+     * e.compareTo(elem) == 0 or null if no such element
+     *
+     * @param e The dummy element to compare to.
+     * @return
+     */
     @Override
     public E get(E e) {
         if (e == null) {
